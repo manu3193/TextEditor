@@ -81,7 +81,7 @@ module Controlador_Menu_Editor(
 	parameter elige = 5;
 	
 	always @(posedge clk or posedge reset) begin
-		if (reset) 
+		if (reset)
 			estado <= inicio;
 		else
 			estado <= sigEstado;
@@ -140,75 +140,6 @@ module Controlador_Menu_Editor(
 			
 			elige:
 				begin
-					case (where_fila)
-						1:
-							nuevo = 1;
-						2:
-							guardar = 1;
-						3:
-							cerrar = 1;
-						4:
-							begin
-							case (where_columna)
-								1:
-									es_mayuscula = 1;
-								2:
-									es_mayuscula = 0;
-							endcase
-							end
-						5:
-							begin
-							case (where_columna)
-								1: 
-									begin
-									text_red = 0;
-									text_green = 0;
-									text_blue = 1;
-									end
-								2:
-									begin
-									text_red = 0;
-									text_green = 1;
-									text_blue = 0;
-									end
-								3:
-									begin
-									text_red = 0;
-									text_green = 1;
-									text_blue = 1;
-									end
-								4:
-									begin
-									text_red = 1;
-									text_green = 0;
-									text_blue = 0;
-									end
-								5:
-									begin
-									text_red = 1;
-									text_green = 0;
-									text_blue = 1;
-									end
-								6:
-									begin
-									text_red = 1;
-									text_green = 1;
-									text_blue = 0;
-									end
-							endcase
-							end
-						6:
-							begin
-							case (where_columna)
-								1:
-									char_scale = 10'd1;
-								2:
-									char_scale = 10'd2;
-								3: 
-									char_scale = 10'd3;
-							endcase
-							end
-					endcase
 					sigEstado = inicio;
 				end
 			
