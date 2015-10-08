@@ -1,53 +1,103 @@
 `timescale 1ns / 1ps
 
-module hvsync_generator(clk, reset,vga_h_sync, vga_v_sync, inDisplayArea, CounterX, CounterY);
-input clk;
-input reset;
-output vga_h_sync, vga_v_sync;
-output inDisplayArea;
-output [9:0] CounterX;
-output [9:0] CounterY;
+module hvsync_generator(
+input wire clk,
+input wire reset,
+output reg vga_h_sync,
+output reg vga_v_sync,
+output reg [10:0] CounterX,
+output reg [10:0] CounterY,
+output reg inDisplayArea
+    );
 
-//////////////////////////////////////////////////
-reg [9:0] CounterX;
-reg [9:0] CounterY;
-reg vga_HS, vga_VS;
-reg inDisplayArea;
-//increment column counter
-always @(posedge clk)
+
+parameter TotalHorizontalPixels = 11'd800;
+parameter HorizontalSyncWidth = 11'd96;
+parameter VerticalSyncWidth = 11'd2;
+
+parameter TotalVerticalLines = 11'd525;
+parameter HorizontalBackPorchTime = 11'd144 ;
+parameter HorizontalFrontPorchTime = 11'd784 ;
+parameter VerticalBackPorchTime = 11'd12 ;
+parameter VerticalFrontPorchTime = 11'd492;
+
+reg VerticalSyncEnable;
+
+reg [10:0] HorizontalCounter;
+reg [10:0] VerticalCounter;
+
+//Counter for the horizontal sync signal
+always @(posedge clk or posedge reset)
 begin
-   if(reset)
-      CounterX <= 0;
-   else if(CounterX==10'h320)	//800
-	   CounterX <= 0;
-   else
-	   CounterX <= CounterX + 1'b1;
+	if(reset == 1)
+		HorizontalCounter <= 0;
+	else
+		begin
+			if(HorizontalCounter == TotalHorizontalPixels - 1)
+				begin //the counter has hreached the end of a horizontal line
+					HorizontalCounter<=0;
+					VerticalSyncEnable <= 1;
+				end
+			else
+				begin 
+					HorizontalCounter<=HorizontalCounter+1; 
+					VerticalSyncEnable <=0;
+				end
+		end
 end
-//increment row counter
-always @(posedge clk)
+
+//Generate the vga_h_sync pulse
+//Horizontal Sync is low when HorizontalCounter is 0-127
+
+always @(*)
 begin
-   if(reset)
-      CounterY<=0; 
-   else if(CounterY==10'h209)    //521
-      CounterY<=0;
-   else if(CounterX==10'h320)    //800
-      CounterY <= CounterY + 1'b1;
+	if((HorizontalCounter<HorizontalSyncWidth))
+		vga_h_sync = 1;
+	else
+		vga_h_sync = 0;
 end
-//generate synchronization signal for both vertical and horizontal
+
+//Counter for the vertical sync
+
+always @(posedge clk or posedge reset)
+begin
+	if(reset == 1)
+		VerticalCounter<=0;
+	else
+	begin
+		if(VerticalSyncEnable == 1)
+			begin
+				if(VerticalCounter==TotalVerticalLines-1)
+					VerticalCounter<=0;
+				else
+					VerticalCounter<=VerticalCounter+1;
+			end
+	end
+end
+
+//generate the vga_v_sync pulse
+always @(*)
+begin
+	if(VerticalCounter < VerticalSyncWidth)
+		vga_v_sync = 1;
+	else
+		vga_v_sync = 0;
+end
+
 always @(posedge clk)
 begin
-	vga_HS <= (CounterX > 655 && CounterX < 752); 		// change these values to move the display horizontally
-	vga_VS <= (CounterY == 490 || CounterY == 491); 	// change these values to move the display vertically
-end 
-
-
-always @(posedge clk)
-   if(reset)
-      inDisplayArea<=0;
-   else
-	   inDisplayArea <= (CounterX<640) && (CounterY<480);
-	
-assign vga_h_sync = ~vga_HS;
-assign vga_v_sync = ~vga_VS;
+	if((HorizontalCounter<HorizontalFrontPorchTime) && (HorizontalCounter>HorizontalBackPorchTime) && (VerticalCounter<VerticalFrontPorchTime) && (VerticalCounter>VerticalBackPorchTime))
+		begin
+			inDisplayArea <= 1;
+			CounterX<= HorizontalCounter - HorizontalBackPorchTime;
+			CounterY<= VerticalCounter - VerticalBackPorchTime;
+		end
+	else
+		begin
+			inDisplayArea <= 0;
+			CounterX<=0;
+			CounterY<=0;
+		end
+end
 
 endmodule

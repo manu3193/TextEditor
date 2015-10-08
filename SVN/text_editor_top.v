@@ -5,9 +5,6 @@ module text_editor_top(
 		ClkPort,              									// the 100 MHz incoming clock signal
 		BtnC,															// the middle button used as Reset
 		Ld7, Ld6, Ld5, Ld4, Ld3, Ld2, Ld1, Ld0,
-		An3, An2, An1, An0,										// 4 anodes
-		Ca, Cb, Cc, Cd, Ce, Cf, Cg,							// 7 cathodes
-		Dp,															// Dot Point Cathode on SSDs
 		PS2KeyboardData,											// PS2 Keyboard data bus
 		PS2KeyboardClk,											// PS2 Keyboard data clock
 		vga_h_sync,													// VGA Output Horizontal Sync signal
@@ -53,8 +50,6 @@ module text_editor_top(
 	
 	output	Ld7, Ld6, Ld5, Ld4, Ld3, Ld2, Ld1, Ld0;
 	
-	output 	Cg, Cf, Ce, Cd, Cc, Cb, Ca, Dp;
-	output 	An0, An1, An2, An3;
 	
 	output 	vga_h_sync, vga_v_sync, vga_r, vga_g, vga_b;
 
@@ -172,16 +167,15 @@ module text_editor_top(
 		vga_b <= Blue  & inDisplayArea;
 	end
 	
-	wire Red   = shouldDraw && ((~drawCursor && text_red   && toDraw[relativePixel]) || (drawCursor && !text_red) || (drawCursor && text_red && text_green && text_blue));
-	wire Blue  = shouldDraw && ((~drawCursor && text_blue  && toDraw[relativePixel]) || (drawCursor && !text_blue));
-	wire Green = shouldDraw && ((~drawCursor && text_green && toDraw[relativePixel]) || (drawCursor && !text_green));
+	wire Red   = !(shouldDraw && ((~drawCursor && text_red   && toDraw[relativePixel]) || (drawCursor && !text_red) || (drawCursor && text_red && text_green && text_blue)));
+	wire Blue  = !(shouldDraw && ((~drawCursor && text_blue  && toDraw[relativePixel]) || (drawCursor && !text_blue)));
+	wire Green = !(shouldDraw && ((~drawCursor && text_green && toDraw[relativePixel]) || (drawCursor && !text_green)));
 	
 	wire [0:255] toDraw;
 	assign toDraw = 	RAM_data == 8'h70 ? Block :
 							RAM_data == 8'h49 ? Period :
 							RAM_data == 8'h41 ? Comma :
 							RAM_data == 8'h52 ? Apost :
-							RAM_data == 8'h16 ? ExlPnt :
 							RAM_data == 8'h1C ? A :
 							RAM_data == 8'h32 ? B :
 							RAM_data == 8'h21 ? C :
@@ -526,61 +520,6 @@ module text_editor_top(
 		end
 	
 	end
-	
-	 
-	/************************************************************************
-	 *                            SSD OUTPUT                                *
-	 ************************************************************************/		
-	assign SSD3 = 0;
-	assign SSD2 = 0;
-	assign SSD1 = KeyData[7:4];
-	assign SSD0 = KeyData[3:0];
-	
-	assign ssdscan_clk = DIV_CLK[19:18];
-	
-	assign An3	= 1; //!(~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 00 **Used for debugging, disabled in final project**
-	assign An2	= 1; //!(~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 01 **Used for debugging, disabled in final project**
-	assign An1	=  !((ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 10
-	assign An0	=  !((ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 11
-	
-	
-	always @ (ssdscan_clk, SSD0, SSD1, SSD2, SSD3) begin: SSD_SCAN_OUT
-		case (ssdscan_clk) 
-				  2'b00: SSD = SSD3;
-				  2'b01: SSD = SSD2;
-				  2'b10: SSD = SSD1;
-				  2'b11: SSD = SSD0;
-		endcase 
-	end
-	
-	// and finally convert SSD_num to ssd
-	// We convert the output of our 4-bit 4x1 mux
-
-	assign {Ca, Cb, Cc, Cd, Ce, Cf, Cg, Dp} = {SSD_CATHODES};
-
-	// Following is Hex-to-SSD conversion
-	always @ (SSD) 
-	begin : HEX_TO_SSD
-		case (SSD)
-			4'b0000: SSD_CATHODES = 8'b00000011; // 0
-			4'b0001: SSD_CATHODES = 8'b10011111; // 1
-			4'b0010: SSD_CATHODES = 8'b00100101; // 2
-			4'b0011: SSD_CATHODES = 8'b00001101; // 3
-			4'b0100: SSD_CATHODES = 8'b10011001; // 4
-			4'b0101: SSD_CATHODES = 8'b01001001; // 5
-			4'b0110: SSD_CATHODES = 8'b01000001; // 6
-			4'b0111: SSD_CATHODES = 8'b00011111; // 7
-			4'b1000: SSD_CATHODES = 8'b00000001; // 8
-			4'b1001: SSD_CATHODES = 8'b00001001; // 9
-			4'b1010: SSD_CATHODES = 8'b00010001; // A
-			4'b1011: SSD_CATHODES = 8'b11000001; // B
-			4'b1100: SSD_CATHODES = 8'b01100011; // C
-			4'b1101: SSD_CATHODES = 8'b10000101; // D
-			4'b1110: SSD_CATHODES = 8'b01100001; // E
-			4'b1111: SSD_CATHODES = 8'b01110001; // F    
-			default: SSD_CATHODES = 8'bXXXXXXXX; // default is not needed as we covered all cases
-		endcase
-	end	
 	
 	
 	//-------------------------MENU EDITOR TEXTO---------------------------------------
