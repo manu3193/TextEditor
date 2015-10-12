@@ -16,8 +16,7 @@ module text_editor_top(
 		boton_abajo_in,
 		boton_izq_in,
 		boton_der_in,
-		boton_elige_in
-	  
+		boton_elige_in	
 	  );
 	  
 	input boton_arriba_in,
@@ -117,14 +116,21 @@ module text_editor_top(
 	parameter row_length_i = 10'd18;					// Initial length of a row (number of columns)
 	parameter col_length_i = 10'd29;					// Initial length of a column (number of rows)
 	
-	reg [9:0] char_scale;
+	wire text_red, text_green, text_blue;
+	wire [9:0] char_scale;
+	wire es_mayuscula, nuevo, guardar, cerrar;
+	
+	//reg [9:0] char_scale;
 	reg [9:0] row_length;
 	reg [9:0] col_length;
 	reg [9:0] scroll;
 	
-	reg text_red;
-	reg text_green;
-	reg text_blue;
+	//reg text_red;
+	//reg text_green;
+	//reg text_blue;
+	wire [2:0] textMenu_rgb, text_rgb;
+	
+	wire textMenu_graph_on, text_on;
 	
 	wire inDisplayArea;
 	wire [9:0] CounterX;
@@ -133,7 +139,7 @@ module text_editor_top(
 	wire [9:0] CounterXDiv;
 	wire [9:0] CounterYDiv; 
 	assign CounterXDiv = CounterX / char_scale;
-	assign CounterYDiv = CounterY / char_scale;
+	assign CounterYDiv = (CounterY / char_scale);
 	
 	wire shouldDraw;
 	assign shouldDraw = CounterXDiv < char_dim * row_length && CounterYDiv < char_dim * col_length;
@@ -161,10 +167,41 @@ module text_editor_top(
 		.CounterY(CounterY)
 	);
 	
+	 // instantiate text module
+   text_screen_gen text_unit
+      (.clk(sys_clk),.pixel_x(CounterX), .pixel_y(CounterY),
+       .sw(), .btn(),
+        .text_rgb(text_rgb), .text_on(text_on));
+   // instantiate graph module
+   textMenu_graph graph_unit
+      (.clk(sys_clk), .reset(Reset), .item_selector(swMenu),
+       .pix_x(CounterX), .pix_y(CounterY),
+       .graph_on(textMenu_graph_on), .graph_rgb(textMenu_rgb));
+	
+	
 	always @(posedge VGA_clk) begin
-		vga_r <= Red   & inDisplayArea;
-		vga_g <= Green & inDisplayArea;
-		vga_b <= Blue  & inDisplayArea;
+		if(inDisplayArea) begin
+			if(text_on) begin
+				vga_r<=text_rgb[0];
+				vga_g<=text_rgb[1];
+				vga_b<=text_rgb[2];
+			end
+			else if (textMenu_graph_on) begin
+				vga_r<=textMenu_rgb[0];
+				vga_g<=textMenu_rgb[1];
+				vga_b<=textMenu_rgb[2];			
+			end
+			else begin
+				vga_r <= Red;
+				vga_g <= Green;
+				vga_b <= Blue;
+			end
+		end
+		else begin
+		vga_r <= 1'b0;
+		vga_g <= 1'b0;
+		vga_b <= 1'b0;
+		end
 	end
 	
 	wire Red   = !(shouldDraw && ((~drawCursor && text_red   && toDraw[relativePixel]) || (drawCursor && !text_red) || (drawCursor && text_red && text_green && text_blue)));
@@ -176,32 +213,60 @@ module text_editor_top(
 							RAM_data == 8'h49 ? Period :
 							RAM_data == 8'h41 ? Comma :
 							RAM_data == 8'h52 ? Apost :
-							RAM_data == 8'h1C ? A :
-							RAM_data == 8'h32 ? B :
-							RAM_data == 8'h21 ? C :
-							RAM_data == 8'h23 ? D :
-							RAM_data == 8'h24 ? E :
-							RAM_data == 8'h2B ? F :
-							RAM_data == 8'h34 ? G :
-							RAM_data == 8'h33 ? H :
-							RAM_data == 8'h43 ? I :
-							RAM_data == 8'h3B ? J :
-							RAM_data == 8'h42 ? K :
-							RAM_data == 8'h4B ? L :
-							RAM_data == 8'h3A ? M :
-							RAM_data == 8'h31 ? N :
-							RAM_data == 8'h44 ? O :
-							RAM_data == 8'h4D ? P :
-							RAM_data == 8'h15 ? Q :
-							RAM_data == 8'h2D ? R :
-							RAM_data == 8'h1B ? S :
-							RAM_data == 8'h2C ? T :
-							RAM_data == 8'h3C ? U :
-							RAM_data == 8'h2A ? V :
-							RAM_data == 8'h1D ? W :
-							RAM_data == 8'h22 ? X :
-							RAM_data == 8'h35 ? Y :
-							RAM_data == 8'h1A ? Z :
+							//mayusculas
+							RAM_data == (8'h1C && es_mayuscula)? A :
+							RAM_data == (8'h32 && es_mayuscula)? B :
+							RAM_data == (8'h21 && es_mayuscula)? C :
+							RAM_data == (8'h23 && es_mayuscula)? D :
+							RAM_data == (8'h24 && es_mayuscula)? E :
+							RAM_data == (8'h2B && es_mayuscula)? F :
+							RAM_data == (8'h34 && es_mayuscula)? G :
+							RAM_data == (8'h33 && es_mayuscula)? H :
+							RAM_data == (8'h43 && es_mayuscula)? I :
+							RAM_data == (8'h3B && es_mayuscula)? J :
+							RAM_data == (8'h42 && es_mayuscula)? K :
+							RAM_data == (8'h4B && es_mayuscula)? L :
+							RAM_data == (8'h3A && es_mayuscula)? M :
+							RAM_data == (8'h31 && es_mayuscula)? N :
+							RAM_data == (8'h44 && es_mayuscula)? O :
+							RAM_data == (8'h4D && es_mayuscula)? P :
+							RAM_data == (8'h15 && es_mayuscula)? Q :
+							RAM_data == (8'h2D && es_mayuscula)? R :
+							RAM_data == (8'h1B && es_mayuscula)? S :
+							RAM_data == (8'h2C && es_mayuscula)? T :
+							RAM_data == (8'h3C && es_mayuscula)? U :
+							RAM_data == (8'h2A && es_mayuscula)? V :
+							RAM_data == (8'h1D && es_mayuscula)? W :
+							RAM_data == (8'h22 && es_mayuscula)? X :
+							RAM_data == (8'h35 && es_mayuscula)? Y :
+							RAM_data == (8'h1A && es_mayuscula)? Z :
+							//minusculas
+							RAM_data == (8'h1C && !es_mayuscula)? a :
+							RAM_data == (8'h32 && !es_mayuscula)? b :
+							RAM_data == (8'h21 && !es_mayuscula)? c :
+							RAM_data == (8'h23 && !es_mayuscula)? d :
+							RAM_data == (8'h24 && !es_mayuscula)? e :
+							RAM_data == (8'h2B && !es_mayuscula)? f :
+							RAM_data == (8'h34 && !es_mayuscula)? g :
+							RAM_data == (8'h33 && !es_mayuscula)? h :
+							RAM_data == (8'h43 && !es_mayuscula)? i :
+							RAM_data == (8'h3B && !es_mayuscula)? j :
+							RAM_data == (8'h42 && !es_mayuscula)? k :
+							RAM_data == (8'h4B && !es_mayuscula)? l :
+							RAM_data == (8'h3A && !es_mayuscula)? m :
+							RAM_data == (8'h31 && !es_mayuscula)? n :
+							RAM_data == (8'h44 && !es_mayuscula)? o :
+							RAM_data == (8'h4D && !es_mayuscula)? p :
+							RAM_data == (8'h15 && !es_mayuscula)? q :
+							RAM_data == (8'h2D && !es_mayuscula)? r :
+							RAM_data == (8'h1B && !es_mayuscula)? s :
+							RAM_data == (8'h2C && !es_mayuscula)? t :
+							RAM_data == (8'h3C && !es_mayuscula)? u :
+							RAM_data == (8'h2A && !es_mayuscula)? v :
+							RAM_data == (8'h1D && !es_mayuscula)? w :
+							RAM_data == (8'h22 && !es_mayuscula)? x :
+							RAM_data == (8'h35 && !es_mayuscula)? y :
+							RAM_data == (8'h1A && !es_mayuscula)? z :
 							//numeros
 							RAM_data == 8'h16 ? num1 :
 							RAM_data == 8'h1E ? num2 :
@@ -254,12 +319,11 @@ module text_editor_top(
 	parameter [0:255] num4   = 256'h0000007C00DC019C031C061C0C1C181C301C3FFC001C001C001C001C001C001C;
 	parameter [0:255] num5   = 256'h00003FFC3FFC3000300030003FC001E00070003000380038007000E03FC03F00;
 	parameter [0:255] num6   = 256'h000000E003800E0018003800380038003FE03FF03C18381838181C181FF00FE0;
-	parameter [0:255] num7   = 256'h00003FFC3FFC001C001C001C3FFC3FFC001C001C001C001C001C001C001C001C;
+	parameter [0:255] num7   = 256'h00003FFC3FFC000C000C000C00180030006000C00180030006000C0018003000;
 	parameter [0:255] num8   = 256'h00001FF83FFC381C381C381C3FFC3FFC381C381C381C381C381C381C3FFC1FF8;
 	parameter [0:255] num9   = 256'h00001FFC3FFC381C300C300C381C1FFC0FFC000C000C000C000C000C007C007C;
 	parameter [0:255] num0   = 256'h00001FF83FFC381C381C381C381C381C381C381C381C381C381C381C3FFC1FF8;
 	//minusculas
-	/*
 	parameter [0:255] a      = 256'h00000000000000000000000007F007F80018000C03FC0FFC0C0C0C0C0FFC07FC;
 	parameter [0:255] b      = 256'h0000E000E000E000E000E000FFF8FFFCE01CE01CE01CE01CE01CE01CFFFCFFFC;
 	parameter [0:255] c      = 256'h000000000000000000001FF07FFCF81EF01EE000E000E000E01EF01E7FFC1FF0;
@@ -286,7 +350,6 @@ module text_editor_top(
 	parameter [0:255] x      = 256'h00000000000000000000000000003CF03CF01FE00FC007800FC01FE03CF03CF0;
 	parameter [0:255] y      = 256'h000000000000000000000000E00F701E781C3C780FE007C007800F001E003C00;
 	parameter [0:255] z      = 256'h000000000000000000000000FFFEFFFE001E007801E007801E007800FFFEFFFE;
-	*/
 	
 	
 	/************************************************************************
@@ -327,19 +390,29 @@ module text_editor_top(
 	 /************************************************************************
 	 *                           PUSHBUTTONS                                 *
 	 ************************************************************************/
-	 Navegador_PushButtons pushbuttons (
-		.clk_100Mhz (sys_clk),
-		.boton_arriba_in (boton_arriba_in), 
-		.boton_abajo_in (boton_abajo_in), 
-		.boton_izq_in (boton_izq_in), 
-		.boton_der_in (boton_der_in),
-		.boton_elige_in (boton_elige_in),
-		.boton_arriba_out (boton_arriba),
-		.boton_abajo_out (boton_abajo),
-		.boton_izq_out (boton_izq),
-		.boton_der_out (boton_der),
-		.boton_elige_out (boton_elige)
-	);
+	 	 
+	 Controlador_Menu_Editor(
+		.clk (sys_clk), 
+		.reset (Reset),
+		.boton_arriba_in(boton_arriba_in),
+		.boton_abajo_in(boton_abajo_in),
+		.boton_izq_in(boton_izq_in),
+		.boton_der_in(boton_der_in),
+		.boton_elige_in(boton_elige_in),
+		
+		.text_red(text_red),
+		.text_green(text_green),
+		.text_blue(text_blue),
+		.char_scale(char_scale),
+		
+		.es_mayuscula(es_mayuscula),
+		.nuevo(nuevo),
+		.guardar(guardar),
+		.cerrar(cerrar),
+		
+		.where_fila(where_fila),
+		.where_columna(where_columna)
+   );
 	 
 	
 	/************************************************************************
@@ -359,13 +432,13 @@ module text_editor_top(
 			document_pointer <= 9'bXXXXXXXXX;
 			write_location <= 9'bXXXXXXXXX;
 			write_to_RAM <= 1'bX;
-			char_scale <= 10'bXXXXXXXXXX;
+			//char_scale <= 10'bXXXXXXXXXX;
 			row_length <= 10'bXXXXXXXXXX;
 			col_length <= 10'bXXXXXXXXXX;
 			scroll <= 10'bXXXXXXXXXX;
-			text_red <= 1'bX;
-			text_green <= 1'bX;
-			text_blue <= 1'bX;
+			//text_red <= 1'bX;
+			//text_green <= 1'bX;
+			//text_blue <= 1'bX;
 			
 			state <= INI;
 		end else begin			
@@ -377,13 +450,13 @@ module text_editor_top(
 					write_to_RAM <= 1'b0;
 					document_pointer <= 10'd0;
 					write_location <= 10'd0;
-					char_scale <= char_scale_i;
+					//char_scale <= char_scale_i;
 					row_length <= row_length_i;
 					col_length <= col_length_i;
 					scroll <= 10'd0;
-					text_red <= 1'b0;
-					text_green <= 1'b1;
-					text_blue <= 1'b0;
+					//text_red <= 1'b0;
+					//text_green <= 1'b1;
+					//text_blue <= 1'b0;
 				end
 				
 				GETKEY: begin
@@ -444,6 +517,7 @@ module text_editor_top(
 							end
 						end
 						//------------cambia tamanio de letra----------------------
+						/*
 						8'h79: begin // + KEYPAD
 							write_to_RAM <= 1'b0;
 							if (char_scale < 10'd3) begin
@@ -457,6 +531,7 @@ module text_editor_top(
 								char_scale <= char_scale - 1'b1;
 							end
 						end
+						*/
 						//--------------------------------------------------------
 						8'h7D: begin // PG UP
 							write_to_RAM <= 1'b0;
@@ -472,6 +547,7 @@ module text_editor_top(
 							end
 						end
 						//------------------------cambia color de la letra------------------------------
+						/*
 						8'h05: begin // F1 (Red color)
 							write_to_RAM <= 1'b0;
 							text_red <= ~text_red;
@@ -495,6 +571,7 @@ module text_editor_top(
 								text_green <= 1'b1;
 							end
 						end
+						*/
 						//----------------------------------------------------------------------------
 						8'h71: begin // DELETE KEY						
 							CurrentKey <= 8'h29; // SPACE

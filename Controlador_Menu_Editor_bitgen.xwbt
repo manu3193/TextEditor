@@ -1,0 +1,8 @@
+INTSTYLE=ise
+INFILE=/home/manzumbado/Development/HDL/TextEditor/trunk/Controlador_Menu_Editor.ncd
+OUTFILE=/home/manzumbado/Development/HDL/TextEditor/trunk/Controlador_Menu_Editor.bit
+FAMILY=Spartan6
+PART=xc6slx16-3csg324
+WORKINGDIR=/home/manzumbado/Development/HDL/TextEditor/trunk
+LICENSE=WebPack
+USER_INFO=211070604_0_0_534

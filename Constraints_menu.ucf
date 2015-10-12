@@ -1,0 +1,17 @@
+
+NET clk LOC = V10;
+NET reset LOC = T10;
+
+NET boton_arriba_in LOC = A8;
+NET boton_abajo_in LOC = C9;
+NET boton_izq_in LOC = C4;
+NET boton_der_in LOC = D9;
+NET boton_elige_in LOC = B8;
+
+NET where_fila[2] LOC = T11;
+NET where_fila[1] LOC = R11;
+NET where_fila[0] LOC = N11;
+
+NET where_columna[2] LOC = U15;
+NET where_columna[1] LOC = V16;
+NET where_columna[0] LOC = U16;

@@ -1,0 +1,1 @@
+-intstyle "ise" -incremental -lib "unisims_ver" -lib "unimacro_ver" -lib "xilinxcorelib_ver" -lib "secureip" -o "C:/Users/Arturo/Desktop/Proyecto Corto 2 Codigo/EditorTexto/sim_menu_isim_beh.exe" -prj "C:/Users/Arturo/Desktop/Proyecto Corto 2 Codigo/EditorTexto/sim_menu_beh.prj" "work.sim_menu" "work.glbl" 
