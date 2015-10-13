@@ -16,9 +16,9 @@ Net "FlashCS" LOC = L17 | IOSTANDARD = LVCMOS33; #Bank = 1, pin name = IO_L46P_F
 Net "QuadSpiFlashCS" LOC = V3  | IOSTANDARD = LVCMOS33; #Bank = MISC, pin name = IO_L65N_CSO_B_2, Sch name = CS
 
 ## VGA
-NET "vga_r" LOC = U7 | IOSTANDARD = "LVCMOS33";
-NET "vga_g" LOC = P8 | IOSTANDARD = "LVCMOS33";
-NET "vga_b" LOC = R7 | IOSTANDARD = "LVCMOS33";
+NET "vga_r" LOC = N7 | IOSTANDARD = "LVCMOS33";
+NET "vga_g" LOC = V6 | IOSTANDARD = "LVCMOS33";
+NET "vga_b" LOC = T7 | IOSTANDARD = "LVCMOS33";
 NET "vga_h_sync" LOC = N6 | IOSTANDARD = "LVCMOS33";
 NET "vga_v_sync" LOC = P7 | IOSTANDARD = "LVCMOS33";
 		

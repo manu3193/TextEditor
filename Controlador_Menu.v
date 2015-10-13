@@ -18,6 +18,12 @@ module Controlador_Menu_Editor(
 	char_scale,
 	es_mayuscula,
 	
+	text_red_temp,
+	text_green_temp,
+	text_blue_temp,
+	char_scale_temp,
+	es_mayuscula_temp,
+	
 	nuevo,
 	guardar,
 	cerrar,
@@ -28,9 +34,10 @@ module Controlador_Menu_Editor(
 	
 	input clk, reset;
 	input boton_arriba_in, boton_abajo_in, boton_izq_in, boton_der_in, boton_elige_in;
-	//input boton_arriba, boton_abajo, boton_izq, boton_der, boton_elige;
+
 	
 	wire boton_arriba, boton_abajo, boton_izq, boton_der, boton_elige;
+	
 	
 	Navegador_PushButtons nav_pb(
 		.clk_100Mhz (clk),
@@ -50,9 +57,42 @@ module Controlador_Menu_Editor(
 	
 	output reg [2:0] where_fila; 
 	output reg [2:0] where_columna;
-	output reg [9:0] char_scale;	
+	
+	output reg [9:0] char_scale;
+	output wire [9:0] char_scale_temp;
+	
 	output reg text_red, text_green, text_blue, es_mayuscula;
+	output wire text_red_temp, text_green_temp, text_blue_temp, es_mayuscula_temp;
+	
 	output reg nuevo, guardar, cerrar;
+		
+	assign text_red_temp = (where_fila == 5 && where_columna == 1)? 0 :
+								  (where_fila == 5 && where_columna == 2)? 0 :
+								  (where_fila == 5 && where_columna == 3)? 0 :
+								  (where_fila == 5 && where_columna == 4)? 1 :
+								  (where_fila == 5 && where_columna == 5)? 1 :
+								  (where_fila == 5 && where_columna == 6)? 1 : 0;
+								  
+	assign text_green_temp = (where_fila == 5 && where_columna == 1)? 0 :
+								  (where_fila == 5 && where_columna == 2)? 1 :
+								  (where_fila == 5 && where_columna == 3)? 1 :
+								  (where_fila == 5 && where_columna == 4)? 0 :
+								  (where_fila == 5 && where_columna == 5)? 0 :
+								  (where_fila == 5 && where_columna == 6)? 1 : 0;
+								  
+	assign text_blue_temp = (where_fila == 5 && where_columna == 1)? 1 :
+								  (where_fila == 5 && where_columna == 2)? 0 :
+								  (where_fila == 5 && where_columna == 3)? 1 :
+								  (where_fila == 5 && where_columna == 4)? 0 :
+								  (where_fila == 5 && where_columna == 5)? 1 :
+								  (where_fila == 5 && where_columna == 6)? 0 : 1;
+	
+	assign es_mayuscula_temp = (where_fila == 4 && where_columna == 2)? 0 : 1;
+	
+	assign char_scale_temp = (where_fila == 6 && where_columna == 1)? 10'd1 :
+									 (where_fila == 6 && where_columna == 2)? 10'd2 :
+									 (where_fila == 6 && where_columna == 3)? 10'd3 :
+									 10'd2;
 
 	initial begin
 		where_fila <= 1;
@@ -107,6 +147,7 @@ module Controlador_Menu_Editor(
 				
 			aumenta_fila:
 				begin
+					nuevo = 0;
 					where_columna = 1;
 					where_fila = (where_fila < 6)? where_fila + 1 : where_fila;
 					sigEstado = inicio;

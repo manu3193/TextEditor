@@ -93,19 +93,19 @@ module text_screen_gen
 			
       endcase
 	
-	assign caps_label_on = (pixel_y[9:4]==2) && (pixel_x[9:3]<=52 &&(pixel_x[9:3]>=51));
+	assign caps_label_on = (pixel_y[9:4]==2) && (pixel_x[9:3]<=57 &&(pixel_x[9:3]>=56));
    assign row_addr_caps_label = pixel_y[4:0];
    assign bit_addr_caps_label = pixel_x[3:0];
    always @*
       case (pixel_x[6:3])
-         4'd51: 
+         4'd56: 
 				begin
 				if (caps_on)
 					char_addr_caps_label = 7'h41; // A
 				else if (!caps_on) 
 					char_addr_caps_label = 7'h61; // a
 				end
-         4'd52: 
+         4'd57: 
 				begin
 				if (caps_on)
 					char_addr_caps_label = 7'h61; // a
@@ -114,32 +114,32 @@ module text_screen_gen
 				end
       endcase
 		
-	assign color_label_on = (pixel_y[9:4]==2) && (pixel_x[9:3]<=64 &&(pixel_x[9:3]>=60));
+	assign color_label_on = (pixel_y[9:4]==2) && (pixel_x[9:3]<=68 &&(pixel_x[9:3]>=64));
    assign row_addr_color_label = pixel_y[4:0];
    assign bit_addr_color_label = pixel_x[3:0];
    always @*
       case (pixel_x[6:3])
-         4'd60: char_addr_color_label = 7'h43; //  C
-         4'd61: char_addr_color_label = 7'h6f; // o
-         4'd62: char_addr_color_label = 7'h6c; // l
-			4'd63: char_addr_color_label = 7'h6f;//  o
-			4'd64: char_addr_color_label = 7'h72;//  r
+         4'd64: char_addr_color_label = 7'h43; //  C
+         4'd65: char_addr_color_label = 7'h6f; // o
+         4'd66: char_addr_color_label = 7'h6c; // l
+			4'd67: char_addr_color_label = 7'h6f;//  o
+			4'd68: char_addr_color_label = 7'h72;//  r
 			
       endcase
 		
-	assign size_label_on = (pixel_y[9:4]==2) && (pixel_x[9:3]<=79 &&(pixel_x[9:3]>=72));
-   assign row_addr_save_label = pixel_y[4:0];
-   assign bit_addr_save_label = pixel_x[3:0];
+	assign size_label_on = (pixel_y[9:4]==2) && (pixel_x[9:3]<=78 &&(pixel_x[9:3]>=71));
+   assign row_addr_size_label = pixel_y[4:0];
+   assign bit_addr_size_label = pixel_x[3:0];
    always @*
       case (pixel_x[6:3])
-         4'd72: char_addr_size_label = 7'h53; // S
-         4'd73: char_addr_size_label = 7'h69; // i
-         4'd74: char_addr_size_label = 7'h7a; // z
-			4'd75: char_addr_size_label = 7'h65;// e
-			4'd76: char_addr_size_label = 7'h3a; //  :
-         4'd77: char_addr_size_label = 7'h20; // 
-			4'd78: char_addr_size_label = 7'h31; // 1
-			4'd79:
+         4'd71: char_addr_size_label = 7'h53; // S
+         4'd72: char_addr_size_label = 7'h69; // i
+         4'd73: char_addr_size_label = 7'h7a; // z
+			4'd74: char_addr_size_label = 7'h65;// e
+			4'd75: char_addr_size_label = 7'h3a; //  :
+         4'd76: char_addr_size_label = 7'h20; // 
+			4'd77: char_addr_size_label = 7'h31; // 1
+			4'd78:
 				begin
 					if(size_selector==10'd1)
 						char_addr_size_label = 7'h30; // 0
@@ -241,7 +241,7 @@ module text_screen_gen
 					row_addr = row_addr_color_label;
 					bit_addr = bit_addr_color_label;
 					if (font_bit)
-						text_rgb = !color_selector;
+						text_rgb = color_selector;
 				end
 			else if (size_label_on)
 				begin

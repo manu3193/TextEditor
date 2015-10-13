@@ -39,8 +39,8 @@ module textMenu_graph
 	localparam topMenu_x_limit_right=640;
 	
 	//Top menu main window horizontal limits
-	localparam topMenu_main_x_limit_left=190;
-	localparam topMenu_main_x_limit_right=420;
+	localparam topMenu_main_x_limit_left=186;
+	localparam topMenu_main_x_limit_right=416;
 	
 	//Top menu items sections horizontal each region
 	localparam topMenu_x_open_limit_left=10;
@@ -56,6 +56,11 @@ module textMenu_graph
 	localparam topMenu_x_color_limit_right=topMenu_x_color_limit_left+60;
 	localparam topMenu_x_size_limit_left=topMenu_x_color_limit_right+10;
 	localparam topMenu_x_size_limit_right=topMenu_x_size_limit_left+60;
+	
+	localparam topMenu_main_y_item_top_limit= topMenu_main_y_limit_top+10;   //////////
+	localparam topMenu_main_y_item_bottom_limit= topMenu_main_y_item_top_limit+45;
+	localparam topMenu_main_x_item_left_limit= topMenu_main_x_limit_left;
+	localparam topMenu_main_x_item_right_limit= topMenu_main_x_limit_left+60;
 	
 	
 	//Top menu items vertical limits
@@ -177,25 +182,25 @@ always @ (*) begin
 		case(currentItemMainMenu) 
 		
 			itemMainMenu1: begin
-							show_item_main_selector[0] = ((topMenu_y_item_top_limit<=pix_y) && (pix_y <= topMenu_y_item_top_limit+1) &&
-															(topMenu_x_open_limit_left<=pix_x) && (pix_x <= topMenu_x_open_limit_right)) ||
-															((topMenu_y_item_bottom_limit-1<=pix_y) && (pix_y <= topMenu_y_item_bottom_limit) &&
-															(topMenu_x_open_limit_left<=pix_x) && (pix_x <= topMenu_x_open_limit_right)) ||
-															((topMenu_y_item_top_limit<=pix_y) && (pix_y <= topMenu_y_item_bottom_limit) &&
-															(topMenu_x_open_limit_left<=pix_x) && (pix_x <= topMenu_x_open_limit_left+1)) ||
-															((topMenu_y_item_top_limit<=pix_y) && (pix_y <= topMenu_y_item_bottom_limit) &&
-															(topMenu_x_open_limit_right-1<=pix_x) && (pix_x <= topMenu_x_open_limit_right));
+							show_item_main_selector[0] = ((topMenu_main_y_item_top_limit<=pix_y) && (pix_y <= topMenu_main_y_item_top_limit+1) &&
+															(topMenu_main_x_item_left_limit<=pix_x) && (pix_x <= topMenu_main_x_item_right_limit)) ||
+															((topMenu_main_y_item_top_limit-1<=pix_y) && (pix_y <= topMenu_main_y_item_bottom_limit) &&
+															(topMenu_main_x_item_left_limit<=pix_x) && (pix_x <= topMenu_main_x_item_right_limit)) ||
+															((topMenu_main_y_item_top_limit<=pix_y) && (pix_y <= topMenu_main_y_item_bottom_limit) &&
+															(topMenu_main_x_item_left_limit<=pix_x) && (pix_x <= topMenu_main_x_item_left_limit+1)) ||
+															((topMenu_main_y_item_top_limit<=pix_y) && (pix_y <= topMenu_main_y_item_bottom_limit) &&
+															(topMenu_main_x_item_right_limit-1<=pix_x) && (pix_x <= topMenu_main_x_item_right_limit));
 							end
 			
 			itemMainMenu2: begin
-							show_item_main_selector[1] = ((topMenu_y_item_top_limit<=pix_y) && (pix_y <= topMenu_y_item_top_limit+1) &&
-															(topMenu_x_save_limit_left<=pix_x) && (pix_x <= topMenu_x_save_limit_right)) ||
-															((topMenu_y_item_bottom_limit-1<=pix_y) && (pix_y <= topMenu_y_item_bottom_limit) &&
-															(topMenu_x_save_limit_left<=pix_x) && (pix_x <= topMenu_x_save_limit_right)) ||
-															((topMenu_y_item_top_limit<=pix_y) && (pix_y <= topMenu_y_item_bottom_limit) &&
-															(topMenu_x_save_limit_left<=pix_x) && (pix_x <= topMenu_x_save_limit_left+1)) ||
-															((topMenu_y_item_top_limit<=pix_y) && (pix_y <= topMenu_y_item_bottom_limit) &&
-															(topMenu_x_save_limit_right-1<=pix_x) && (pix_x <= topMenu_x_save_limit_right));
+							show_item_main_selector[1] = ((topMenu_main_y_item_top_limit+50<=pix_y) && (pix_y <= topMenu_main_y_item_top_limit+50+1) &&
+															(topMenu_main_x_item_left_limit<=pix_x) && (pix_x <= topMenu_main_x_item_right_limit)) ||
+															((topMenu_main_y_item_top_limit+50-1<=pix_y) && (pix_y <= topMenu_main_y_item_bottom_limit+50) &&
+															(topMenu_main_x_item_left_limit<=pix_x) && (pix_x <= topMenu_main_x_item_right_limit)) ||
+															((topMenu_main_y_item_top_limit+50<=pix_y) && (pix_y <= topMenu_main_y_item_bottom_limit+50) &&
+															(topMenu_main_x_item_left_limit<=pix_x) && (pix_x <= topMenu_main_x_item_left_limit+1)) ||
+															((topMenu_main_y_item_top_limit+50<=pix_y) && (pix_y <= topMenu_main_y_item_bottom_limit+50) &&
+															(topMenu_main_x_item_right_limit-1<=pix_x) && (pix_x <= topMenu_main_x_item_right_limit));
 
 							end
 			default: 	begin
@@ -214,7 +219,7 @@ always @ (*) begin
 				graph_rgb = 3'b000;
 			else if (show_item_selector[0] || show_item_selector[1] || show_item_selector[2] ||
          		show_item_selector[3] || show_item_selector[4] || show_item_selector[5])
-					graph_rgb = 3'b110;
+					graph_rgb = 3'b000;
 			else
 				graph_rgb = 3'b111; // black background
 		end 
@@ -222,7 +227,7 @@ always @ (*) begin
 			if(menu_mostrar)
 				graph_rgb=3'b000;
 			else if(show_item_main_selector[0] || show_item_main_selector[1])
-				graph_rgb =3'b111;
+				graph_rgb =3'b000;
 			else
 				graph_rgb = 3'b111; // black background
 		end
@@ -230,6 +235,6 @@ always @ (*) begin
 	
 	assign graph_on=((show_item_selector[0] || show_item_selector[1] || show_item_selector[2] ||
 						   show_item_selector[3] || show_item_selector[4] || show_item_selector[5] || menu_mostrar_separador) && window_selector) ||
-						((show_item_main_selector[0]||show_item_main_selector[1]) && !window_selector);
+						((/*show_item_main_selector[0]||show_item_main_selector[1]||*/ menu_mostrar) && !window_selector);
 
 endmodule 

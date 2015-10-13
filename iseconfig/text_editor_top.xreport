@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2015-10-12T20:42:52</DateModified>
+  <DateModified>2015-10-13T09:56:41</DateModified>
   <ModuleName>text_editor_top</ModuleName>
-  <SummaryTimeStamp>2015-10-12T10:57:51</SummaryTimeStamp>
+  <SummaryTimeStamp>2015-10-13T00:42:03</SummaryTimeStamp>
   <SavedFilePath>/home/manzumbado/Development/HDL/TextEditor/trunk/iseconfig/text_editor_top.xreport</SavedFilePath>
   <ImplementationReportsDirectory>/home/manzumbado/Development/HDL/TextEditor/trunk/</ImplementationReportsDirectory>
   <DateInitialized>2015-10-02T12:05:24</DateInitialized>

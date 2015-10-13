@@ -120,8 +120,14 @@ module text_editor_top(
 	parameter col_length_i = 10'd29;					// Initial length of a column (number of rows)
 	
 	wire text_red, text_green, text_blue;
+	wire text_red_temp, text_green_temp, text_blue_temp;
+	
 	wire [9:0] char_scale;
+	wire [9:0] char_scale_temp;
+	
 	wire es_mayuscula, nuevo, guardar, cerrar;
+	wire es_mayuscula_temp;
+	
 	output wire [2:0] where_fila;
 	output wire [2:0]where_columna;
 	
@@ -183,17 +189,17 @@ module text_editor_top(
 		.pixel_x(CounterX), 
 		.pixel_y(CounterY),
       .text_rgb(text_rgb), 
-		.color_selector({text_red,text_green,text_blue}),
-		.size_selector(char_scale),
-		.caps_on(es_mayuscula),
+		.color_selector({text_blue_temp,text_green_temp,text_red_temp}),
+		.size_selector(char_scale_temp),
+		.caps_on(es_mayuscula_temp),
 		.text_on(text_on), 
 		.window_selector(selector_menu)
 	);
    // instantiate graph module
-   textMenu_graph graph_unit(
+   textMenu_graph graph_unit( 
 		.clk(sys_clk), 
 		.reset(Reset), 
-		.item_selector(swMenu),
+		.item_selector(where_fila),
       .pix_x(CounterX), 
 		.pix_y(CounterY),
       .graph_on(textMenu_graph_on), 
@@ -426,8 +432,14 @@ module text_editor_top(
 		.text_green(text_green),
 		.text_blue(text_blue),
 		.char_scale(char_scale),
-		
 		.es_mayuscula(es_mayuscula),
+		
+		.text_red_temp(text_red_temp),
+		.text_green_temp(text_green_temp),
+		.text_blue_temp(text_blue_temp),
+		.char_scale_temp(char_scale_temp),
+		.es_mayuscula_temp(es_mayuscula_temp),
+		
 		.nuevo(nuevo),
 		.guardar(guardar),
 		.cerrar(cerrar),
@@ -449,7 +461,7 @@ module text_editor_top(
 		UNK    = 2'bXX;
 	
 	always @ (posedge sys_clk, posedge Reset) begin: STATE_MACHINE
-		if (Reset) begin
+		if (Reset || !selector_menu || nuevo ) begin
 			CurrentKey <= 8'hXX;
 			document_pointer <= 9'bXXXXXXXXX;
 			write_location <= 9'bXXXXXXXXX;
