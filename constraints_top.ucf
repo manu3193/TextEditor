@@ -5,15 +5,6 @@ Net "MemOE" LOC = L18 | IOSTANDARD = LVCMOS33; #Bank = 1, pin name = IO_L46N_FOE
 Net "MemWR" LOC = M16 | IOSTANDARD = LVCMOS33; #Bank = 1, pin name = IO_L47P_FWE_B_M1DQ0, Sch name = P30-WE
 Net "RamCS" LOC = L15 | IOSTANDARD = LVCMOS33; #Bank = 1, pin name = IO_L42P_GCLK7_M1UDM, Sch name = MT-CE
 
-## Leds
-Net "Ld0" LOC = U16 | IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L2P_CMPCLK, Sch name = LD0
-Net "Ld1" LOC = V16 |  IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L2N_CMPMOSI, Sch name = LD1
-Net "Ld2" LOC = U15 |  IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L5P, Sch name = LD2
-Net "Ld3" LOC = V15 |  IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L5N, Sch name = LD3
-Net "Ld4" LOC = M11 |  IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L15P, Sch name = LD4
-Net "Ld5" LOC = N11 |  IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L15N, Sch name = LD5
-Net "Ld6" LOC = R11 |  IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L16P, Sch name = LD6
-Net "Ld7" LOC = T11 |  IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L16N_VREF, Sch name = LD7
 ## Keyboard
 NET "PS2KeyboardData" LOC = J13 | PULLUP | IOSTANDARD = LVCMOS33;
 NET "PS2KeyboardClk" LOC  = L12 | PULLUP | IOSTANDARD = LVCMOS33;
@@ -37,5 +28,15 @@ NET "boton_abajo_in" LOC = C9 | IOSTANDARD = "LVCMOS33";
 NET "boton_izq_in" LOC = C4 | IOSTANDARD = "LVCMOS33";
 NET "boton_der_in" LOC = D9 | IOSTANDARD = "LVCMOS33"; 
 NET "boton_elige_in" LOC = B8 | IOSTANDARD = "LVCMOS33"; 
+
+NET where_fila[2] LOC = T11 | IOSTANDARD = "LVCMOS33";
+NET where_fila[1] LOC = R11 | IOSTANDARD = "LVCMOS33";
+NET where_fila[0] LOC = N11 | IOSTANDARD = "LVCMOS33";
+
+NET where_columna[2] LOC = U15 | IOSTANDARD = "LVCMOS33";
+NET where_columna[1] LOC = V16 | IOSTANDARD = "LVCMOS33";
+NET where_columna[0] LOC = U16 | IOSTANDARD = "LVCMOS33";
+
+NET selector_menu LOC = T5 | IOSTANDARD = "LVCMOS33";
 
 	

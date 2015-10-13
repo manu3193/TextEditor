@@ -1,22 +1,25 @@
 `timescale 1ns / 1ps
 
 module text_editor_top(
-		MemOE, MemWR, RamCS, FlashCS, QuadSpiFlashCS, 	// Disable the three memory chips
-		ClkPort,              									// the 100 MHz incoming clock signal
-		BtnC,															// the middle button used as Reset
-		Ld7, Ld6, Ld5, Ld4, Ld3, Ld2, Ld1, Ld0,
-		PS2KeyboardData,											// PS2 Keyboard data bus
-		PS2KeyboardClk,											// PS2 Keyboard data clock
-		vga_h_sync,													// VGA Output Horizontal Sync signal
-		vga_v_sync,													// VGA Output Vertical Sync signal
-		vga_r,														// Red value for current scanning pixel
-		vga_g,														// Green value for current scanning pixel
-		vga_b,															// Blue value for current scanning pixel
+		MemOE, MemWR, RamCS, FlashCS, QuadSpiFlashCS, 	
+		ClkPort,              									
+		BtnC,														
+		PS2KeyboardData,										
+		PS2KeyboardClk,											
+		vga_h_sync,												
+		vga_v_sync,													
+		vga_r,														
+		vga_g,													
+		vga_b,														
 		boton_arriba_in,
 		boton_abajo_in,
 		boton_izq_in,
 		boton_der_in,
-		boton_elige_in	
+		boton_elige_in,
+		
+		where_fila,
+		where_columna,
+		selector_menu
 	  );
 	  
 	input boton_arriba_in,
@@ -25,11 +28,14 @@ module text_editor_top(
 			boton_der_in,
 			boton_elige_in;
 			
+	input selector_menu;
+			
 	wire boton_arriba,
 			boton_abajo,
 			boton_izq,
 			boton_der,
 			boton_elige;
+			
 	/************************************************************************
 	 *                               INPUTS                                 *
 	 ************************************************************************/
@@ -46,9 +52,6 @@ module text_editor_top(
 	 *                               OUTPUTS                                *
 	 ************************************************************************/
 	output 	MemOE, MemWR, RamCS, FlashCS, QuadSpiFlashCS;
-	
-	output	Ld7, Ld6, Ld5, Ld4, Ld3, Ld2, Ld1, Ld0;
-	
 	
 	output 	vga_h_sync, vga_v_sync, vga_r, vga_g, vga_b;
 
@@ -77,7 +80,7 @@ module text_editor_top(
 	
 	reg vga_r, vga_g, vga_b;
 	
-	assign { Ld7, Ld6, Ld5, Ld4, Ld3, Ld2, Ld1, Ld0	} = document_pointer[7:0];
+	//assign { Ld7, Ld6, Ld5, Ld4, Ld3, Ld2, Ld1, Ld0	} = document_pointer[7:0];
 	
 	assign Reset = BtnC;
 	
@@ -119,6 +122,8 @@ module text_editor_top(
 	wire text_red, text_green, text_blue;
 	wire [9:0] char_scale;
 	wire es_mayuscula, nuevo, guardar, cerrar;
+	output wire [2:0] where_fila;
+	output wire [2:0]where_columna;
 	
 	//reg [9:0] char_scale;
 	reg [9:0] row_length;
@@ -139,7 +144,7 @@ module text_editor_top(
 	wire [9:0] CounterXDiv;
 	wire [9:0] CounterYDiv; 
 	assign CounterXDiv = CounterX / char_scale;
-	assign CounterYDiv = (CounterY / char_scale);
+	assign CounterYDiv = CounterY / char_scale;
 	
 	wire shouldDraw;
 	assign shouldDraw = CounterXDiv < char_dim * row_length && CounterYDiv < char_dim * col_length;
@@ -153,7 +158,10 @@ module text_editor_top(
 	assign read_address = (CounterXDiv / char_dim + CounterYDiv / char_dim * row_length + scroll * row_length) < RAM_size - 1'b1 ? 
 															(CounterXDiv / char_dim + CounterYDiv / char_dim * row_length + scroll * row_length) :
 															RAM_size - 1'b1;
-	
+															
+	/************************************************************************
+	 *                             VGA Control MENU                         *
+	 ************************************************************************/
 	hvsync_generator vgaSyncGen(
 		// Inputs
 		.clk(VGA_clk),
@@ -167,16 +175,31 @@ module text_editor_top(
 		.CounterY(CounterY)
 	);
 	
+	//assign temp=1'b1;
+	
 	 // instantiate text module
-   text_screen_gen text_unit
-      (.clk(sys_clk),.pixel_x(CounterX), .pixel_y(CounterY),
-       .sw(), .btn(),
-        .text_rgb(text_rgb), .text_on(text_on));
+   text_screen_gen text_unit(
+		.clk(sys_clk),
+		.pixel_x(CounterX), 
+		.pixel_y(CounterY),
+      .text_rgb(text_rgb), 
+		.color_selector({text_red,text_green,text_blue}),
+		.size_selector(char_scale),
+		.caps_on(es_mayuscula),
+		.text_on(text_on), 
+		.window_selector(selector_menu)
+	);
    // instantiate graph module
-   textMenu_graph graph_unit
-      (.clk(sys_clk), .reset(Reset), .item_selector(swMenu),
-       .pix_x(CounterX), .pix_y(CounterY),
-       .graph_on(textMenu_graph_on), .graph_rgb(textMenu_rgb));
+   textMenu_graph graph_unit(
+		.clk(sys_clk), 
+		.reset(Reset), 
+		.item_selector(swMenu),
+      .pix_x(CounterX), 
+		.pix_y(CounterY),
+      .graph_on(textMenu_graph_on), 
+		.graph_rgb(textMenu_rgb), 
+		.window_selector(selector_menu)
+	);
 	
 	
 	always @(posedge VGA_clk) begin
@@ -198,9 +221,9 @@ module text_editor_top(
 			end
 		end
 		else begin
-		vga_r <= 1'b0;
-		vga_g <= 1'b0;
-		vga_b <= 1'b0;
+			vga_r <= 1'b0;
+			vga_g <= 1'b0;
+			vga_b <= 1'b0;
 		end
 	end
 	
@@ -214,59 +237,59 @@ module text_editor_top(
 							RAM_data == 8'h41 ? Comma :
 							RAM_data == 8'h52 ? Apost :
 							//mayusculas
-							RAM_data == (8'h1C && es_mayuscula)? A :
-							RAM_data == (8'h32 && es_mayuscula)? B :
-							RAM_data == (8'h21 && es_mayuscula)? C :
-							RAM_data == (8'h23 && es_mayuscula)? D :
-							RAM_data == (8'h24 && es_mayuscula)? E :
-							RAM_data == (8'h2B && es_mayuscula)? F :
-							RAM_data == (8'h34 && es_mayuscula)? G :
-							RAM_data == (8'h33 && es_mayuscula)? H :
-							RAM_data == (8'h43 && es_mayuscula)? I :
-							RAM_data == (8'h3B && es_mayuscula)? J :
-							RAM_data == (8'h42 && es_mayuscula)? K :
-							RAM_data == (8'h4B && es_mayuscula)? L :
-							RAM_data == (8'h3A && es_mayuscula)? M :
-							RAM_data == (8'h31 && es_mayuscula)? N :
-							RAM_data == (8'h44 && es_mayuscula)? O :
-							RAM_data == (8'h4D && es_mayuscula)? P :
-							RAM_data == (8'h15 && es_mayuscula)? Q :
-							RAM_data == (8'h2D && es_mayuscula)? R :
-							RAM_data == (8'h1B && es_mayuscula)? S :
-							RAM_data == (8'h2C && es_mayuscula)? T :
-							RAM_data == (8'h3C && es_mayuscula)? U :
-							RAM_data == (8'h2A && es_mayuscula)? V :
-							RAM_data == (8'h1D && es_mayuscula)? W :
-							RAM_data == (8'h22 && es_mayuscula)? X :
-							RAM_data == (8'h35 && es_mayuscula)? Y :
-							RAM_data == (8'h1A && es_mayuscula)? Z :
+							(RAM_data == 8'h1C && es_mayuscula)? A :
+							(RAM_data == 8'h32 && es_mayuscula)? B :
+							(RAM_data == 8'h21 && es_mayuscula)? C :
+							(RAM_data == 8'h23 && es_mayuscula)? D :
+							(RAM_data == 8'h24 && es_mayuscula)? E :
+							(RAM_data == 8'h2B && es_mayuscula)? F :
+							(RAM_data == 8'h34 && es_mayuscula)? G :
+							(RAM_data == 8'h33 && es_mayuscula)? H :
+							(RAM_data == 8'h43 && es_mayuscula)? I :
+							(RAM_data == 8'h3B && es_mayuscula)? J :
+							(RAM_data == 8'h42 && es_mayuscula)? K :
+							(RAM_data == 8'h4B && es_mayuscula)? L :
+							(RAM_data == 8'h3A && es_mayuscula)? M :
+							(RAM_data == 8'h31 && es_mayuscula)? N :
+							(RAM_data == 8'h44 && es_mayuscula)? O :
+							(RAM_data == 8'h4D && es_mayuscula)? P :
+							(RAM_data == 8'h15 && es_mayuscula)? Q :
+							(RAM_data == 8'h2D && es_mayuscula)? R :
+							(RAM_data == 8'h1B && es_mayuscula)? S :
+							(RAM_data == 8'h2C && es_mayuscula)? T :
+							(RAM_data == 8'h3C && es_mayuscula)? U :
+							(RAM_data == 8'h2A && es_mayuscula)? V :
+							(RAM_data == 8'h1D && es_mayuscula)? W :
+							(RAM_data == 8'h22 && es_mayuscula)? X :
+							(RAM_data == 8'h35 && es_mayuscula)? Y :
+							(RAM_data == 8'h1A && es_mayuscula)? Z :
 							//minusculas
-							RAM_data == (8'h1C && !es_mayuscula)? a :
-							RAM_data == (8'h32 && !es_mayuscula)? b :
-							RAM_data == (8'h21 && !es_mayuscula)? c :
-							RAM_data == (8'h23 && !es_mayuscula)? d :
-							RAM_data == (8'h24 && !es_mayuscula)? e :
-							RAM_data == (8'h2B && !es_mayuscula)? f :
-							RAM_data == (8'h34 && !es_mayuscula)? g :
-							RAM_data == (8'h33 && !es_mayuscula)? h :
-							RAM_data == (8'h43 && !es_mayuscula)? i :
-							RAM_data == (8'h3B && !es_mayuscula)? j :
-							RAM_data == (8'h42 && !es_mayuscula)? k :
-							RAM_data == (8'h4B && !es_mayuscula)? l :
-							RAM_data == (8'h3A && !es_mayuscula)? m :
-							RAM_data == (8'h31 && !es_mayuscula)? n :
-							RAM_data == (8'h44 && !es_mayuscula)? o :
-							RAM_data == (8'h4D && !es_mayuscula)? p :
-							RAM_data == (8'h15 && !es_mayuscula)? q :
-							RAM_data == (8'h2D && !es_mayuscula)? r :
-							RAM_data == (8'h1B && !es_mayuscula)? s :
-							RAM_data == (8'h2C && !es_mayuscula)? t :
-							RAM_data == (8'h3C && !es_mayuscula)? u :
-							RAM_data == (8'h2A && !es_mayuscula)? v :
-							RAM_data == (8'h1D && !es_mayuscula)? w :
-							RAM_data == (8'h22 && !es_mayuscula)? x :
-							RAM_data == (8'h35 && !es_mayuscula)? y :
-							RAM_data == (8'h1A && !es_mayuscula)? z :
+							(RAM_data == 8'h1C && !es_mayuscula)? a :
+							(RAM_data == 8'h32 && !es_mayuscula)? b :
+							(RAM_data == 8'h21 && !es_mayuscula)? c :
+							(RAM_data == 8'h23 && !es_mayuscula)? d :
+							(RAM_data == 8'h24 && !es_mayuscula)? e :
+							(RAM_data == 8'h2B && !es_mayuscula)? f :
+							(RAM_data == 8'h34 && !es_mayuscula)? g :
+							(RAM_data == 8'h33 && !es_mayuscula)? h :
+							(RAM_data == 8'h43 && !es_mayuscula)? i :
+							(RAM_data == 8'h3B && !es_mayuscula)? j :
+							(RAM_data == 8'h42 && !es_mayuscula)? k :
+							(RAM_data == 8'h4B && !es_mayuscula)? l :
+							(RAM_data == 8'h3A && !es_mayuscula)? m :
+							(RAM_data == 8'h31 && !es_mayuscula)? n :
+							(RAM_data == 8'h44 && !es_mayuscula)? o :
+							(RAM_data == 8'h4D && !es_mayuscula)? p :
+							(RAM_data == 8'h15 && !es_mayuscula)? q :
+							(RAM_data == 8'h2D && !es_mayuscula)? r :
+							(RAM_data == 8'h1B && !es_mayuscula)? s :
+							(RAM_data == 8'h2C && !es_mayuscula)? t :
+							(RAM_data == 8'h3C && !es_mayuscula)? u :
+							(RAM_data == 8'h2A && !es_mayuscula)? v :
+							(RAM_data == 8'h1D && !es_mayuscula)? w :
+							(RAM_data == 8'h22 && !es_mayuscula)? x :
+							(RAM_data == 8'h35 && !es_mayuscula)? y :
+							(RAM_data == 8'h1A && !es_mayuscula)? z :
 							//numeros
 							RAM_data == 8'h16 ? num1 :
 							RAM_data == 8'h1E ? num2 :
@@ -350,7 +373,6 @@ module text_editor_top(
 	parameter [0:255] x      = 256'h00000000000000000000000000003CF03CF01FE00FC007800FC01FE03CF03CF0;
 	parameter [0:255] y      = 256'h000000000000000000000000E00F701E781C3C780FE007C007800F001E003C00;
 	parameter [0:255] z      = 256'h000000000000000000000000FFFEFFFE001E007801E007801E007800FFFEFFFE;
-	
 	
 	/************************************************************************
 	 *                             PS2 KEYBOARD                             *
